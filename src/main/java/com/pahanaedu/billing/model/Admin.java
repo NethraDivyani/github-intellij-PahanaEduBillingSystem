@@ -1,25 +1,31 @@
 package com.pahanaedu.billing.model;
 
-public class Admin {
+import java.io.Serializable;
+import java.sql.Timestamp;
+
+public class Admin implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int adminId;
     private String username;
-    private String password; // In production, store hashed passwords!
+    private String passwordHash; // Store only hashed password here
     private String name;
     private String email;
+    private String telephone;
+    private Timestamp createdAt;
 
-    // Constructor
-    public Admin(int adminId, String username, String password, String name, String email) {
+    public Admin() { }
+
+    public Admin(int adminId, String username, String passwordHash, String name, String email, String telephone, Timestamp createdAt) {
         this.adminId = adminId;
         this.username = username;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.name = name;
         this.email = email;
+        this.telephone = telephone;
+        this.createdAt = createdAt;
     }
 
-    // Default constructor
-    public Admin() {}
-
-    // Getters and Setters
     public int getAdminId() {
         return adminId;
     }
@@ -36,12 +42,13 @@ public class Admin {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    // Note: No getter for passwordHash to avoid exposing
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
     public String getName() {
@@ -60,17 +67,20 @@ public class Admin {
         this.email = email;
     }
 
-    // Example: Admin actions (you can expand these)
-    public void manageCustomers() {
-        System.out.println("Managing customers...");
+    public String getTelephone() {
+        return telephone;
     }
 
-    public void manageItems() {
-        System.out.println("Managing items...");
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
     }
 
-    public void generateReport() {
-        System.out.println("Generating report...");
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override
@@ -80,6 +90,10 @@ public class Admin {
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
+                ", telephone='" + telephone + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
+
+    // Optionally, implement equals() and hashCode() here based on adminId or username
 }
