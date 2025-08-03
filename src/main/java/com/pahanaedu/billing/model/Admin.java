@@ -11,8 +11,6 @@ public class Admin implements Serializable {
     private String passwordHash; // Store only hashed password here
     private String name;
     private String email;
-    private String telephone;
-    private Timestamp createdAt;
 
     public Admin() { }
 
@@ -22,8 +20,6 @@ public class Admin implements Serializable {
         this.passwordHash = passwordHash;
         this.name = name;
         this.email = email;
-        this.telephone = telephone;
-        this.createdAt = createdAt;
     }
 
     public int getAdminId() {
@@ -67,22 +63,6 @@ public class Admin implements Serializable {
         this.email = email;
     }
 
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public String toString() {
         return "Admin{" +
@@ -90,10 +70,9 @@ public class Admin implements Serializable {
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", telephone='" + telephone + '\'' +
-                ", createdAt=" + createdAt +
                 '}';
     }
 
     // Optionally, implement equals() and hashCode() here based on adminId or username
+
 }

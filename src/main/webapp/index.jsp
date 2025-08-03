@@ -1,9 +1,11 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>PahanaEdu Book Shop - Login</title>
     <style>
+        /* Your existing CSS styles - unchanged */
         body, html {
             margin: 0;
             padding: 0;
@@ -29,7 +31,6 @@
             padding: 20px;
             box-sizing: border-box;
         }
-
 
         .title-banner {
             font-size: 3em;
@@ -78,7 +79,6 @@
             background-color: #0056b3;
         }
 
-
         @media (max-width: 480px) {
             .login-container {
                 width: 100%;
@@ -97,15 +97,15 @@
     <div class="title-banner">PahanaEdu Book Shop</div>
 
     <div class="login-container">
-        <form id="loginForm" autocomplete="off">
+        <form id="loginForm" method="post" action="LoginServlet" autocomplete="off">
             <label for="username">Username:</label>
-            <input type="text" id="username" required aria-label="Username" />
+            <input type="text" id="username" name="username" required aria-label="Username" />
 
             <label for="password">Password:</label>
-            <input type="password" id="password" required aria-label="Password" />
+            <input type="password" id="password" name="password" required aria-label="Password" />
 
             <label for="role">Select Role:</label>
-            <select id="role" required aria-label="User Role">
+            <select id="role" name="role" required aria-label="User Role">
                 <option value="" disabled selected>-- Select Role --</option>
                 <option value="admin">Admin</option>
                 <option value="cashier">Cashier</option>
@@ -119,30 +119,35 @@
 
 <script>
     document.getElementById("loginForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const role = document.getElementById("role").value;
-
-        if (!role) {
+        // Client-side role validation before submit
+        const roleSelect = document.getElementById("role");
+        if (!roleSelect.value) {
+            event.preventDefault();
             alert("Please select your user role.");
-            return;
-        }
-
-        // TODO: Add backend authentication here (send credentials + role to the server)
-
-        // For demo purposes: redirect based on role only
-        if (role === "admin") {
-            window.location.href = "Admin.jsp";
-        } else if (role === "cashier") {
-            window.location.href = "cashier.jsp";
-        } else if (role === "customer") {
-            window.location.href = "customer.jsp";
-        } else {
-            alert("Invalid role selected.");
         }
     });
 </script>
+
+<%
+    // Show login error message set as request attribute
+    String loginError = (String) request.getAttribute("loginError");
+
+    // Show login success message potentially set as session attribute (because redirect loses request attribute)
+    String loginSuccess = null;
+    if (session != null) {
+        loginSuccess = (String) session.getAttribute("loginSuccess");
+        if (loginSuccess != null) {
+            session.removeAttribute("loginSuccess"); // Remove after showing once
+        }
+    }
+%>
+<script>
+    <% if (loginError != null) { %>
+    alert("<%= loginError.replace("\"", "\\\"") %>");
+    <% } else if (loginSuccess != null) { %>
+    alert("<%= loginSuccess.replace("\"", "\\\"") %>");
+    <% } %>
+</script>
+
 </body>
 </html>

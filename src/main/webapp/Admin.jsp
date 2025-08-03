@@ -1,4 +1,15 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8" %>
+<%@ page import="com.pahanaedu.billing.model.Admin" %>
+<%
+  Admin admin = (session != null) ? (Admin) session.getAttribute("user") : null;
+  String role = (session != null) ? (String) session.getAttribute("role") : null;
+
+  if (admin == null || role == null || !"admin".equals(role)) {
+    response.sendRedirect("index.jsp");
+    return;
+  }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,7 +147,7 @@
   <button onclick="showSection('manageItemsSection')">Manage Items</button>
   <button onclick="showSection('displayAccountsSection')">Display Accounts</button>
   <button onclick="showSection('helpSection')">Help</button>
-  <button onclick="exitSystem()">Exit</button>
+  <button onclick="logout()">Logout</button> <!-- Changed from exitSystem to logout -->
 </nav>
 
 <main>
@@ -163,7 +174,6 @@
               placeholder="Enter exactly 10 digits"
               title="Telephone number must be exactly 10 digits"
       />
-
 
       <label for="newEmail">Email</label>
       <input type="email" id="newEmail" required />
@@ -264,7 +274,7 @@
       <li><strong>Edit Customer:</strong> Search customer by account number to update their details.</li>
       <li><strong>Manage Items:</strong> Add, update, or delete items available for sale.</li>
       <li><strong>Display Account Details:</strong> View all customer accounts registered in the system.</li>
-      <li><strong>Exit:</strong> Log out from the system safely using the Exit button.</li>
+      <li><strong>Logout:</strong> Safely log out using the Logout button.</li>
     </ul>
   </section>
 
@@ -377,8 +387,9 @@
 
     const customer = customers.find(c => c.accountNumber === accNum);
     if (!customer) {
-      document.getElementById('editCustomerMsg').textContent = 'Customer not found!';
-      document.getElementById('editCustomerMsg').className = 'error-message';
+      const msgDiv = document.getElementById('editCustomerMsg');
+      msgDiv.textContent = 'Customer not found!';
+      msgDiv.className = 'error-message';
       return;
     }
 
@@ -387,8 +398,9 @@
     customer.telephone = telephone;
     customer.email = email;
 
-    document.getElementById('editCustomerMsg').textContent = 'Customer updated successfully!';
-    document.getElementById('editCustomerMsg').className = 'info-message';
+    const msgDiv = document.getElementById('editCustomerMsg');
+    msgDiv.textContent = 'Customer updated successfully!';
+    msgDiv.className = 'info-message';
   });
 
   /*** 3. Manage Items Logic ***/
@@ -404,8 +416,9 @@
     const category = document.getElementById('itemCategory').value.trim();
 
     if (!name || isNaN(price) || isNaN(quantity)) {
-      document.getElementById('itemFormMsg').textContent = 'Please fill in required fields with valid values.';
-      document.getElementById('itemFormMsg').className = 'error-message';
+      const msgDiv = document.getElementById('itemFormMsg');
+      msgDiv.textContent = 'Please fill in required fields with valid values.';
+      msgDiv.className = 'error-message';
       return;
     }
 
@@ -418,8 +431,9 @@
         item.price = price;
         item.quantityAvailable = quantity;
         item.category = category;
-        document.getElementById('itemFormMsg').textContent = 'Item updated successfully!';
-        document.getElementById('itemFormMsg').className = 'info-message';
+        const msgDiv = document.getElementById('itemFormMsg');
+        msgDiv.textContent = 'Item updated successfully!';
+        msgDiv.className = 'info-message';
       }
     } else {
       const newId = items.length > 0 ? Math.max(...items.map(i => i.itemId)) + 1 : 1;
@@ -431,8 +445,9 @@
         quantityAvailable: quantity,
         category
       });
-      document.getElementById('itemFormMsg').textContent = 'Item added successfully!';
-      document.getElementById('itemFormMsg').className = 'info-message';
+      const msgDiv = document.getElementById('itemFormMsg');
+      msgDiv.textContent = 'Item added successfully!';
+      msgDiv.className = 'info-message';
     }
 
     e.target.reset();
@@ -501,11 +516,11 @@
     });
   }
 
-  /*** 8. Exit System ***/
-  function exitSystem() {
-    if (confirm("Are you sure you want to exit the system?")) {
-      alert("Logging out...");
-      window.location.href = "index.html";
+  /*** Logout Function ***/
+  function logout() {
+    if (confirm("Are you sure you want to logout?")) {
+      // Redirect to a logout servlet or clear session manually
+      window.location.href = "LogoutServlet"; // recommended to create a LogoutServlet that invalidates the session
     }
   }
 
