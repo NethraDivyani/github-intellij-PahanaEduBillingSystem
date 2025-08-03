@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-<html>
-<body>
-<center><h1>Pahana Edu Bookshop!</h1></center>
-</body> <!-- sample -->
-=======
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,15 +5,13 @@
     <meta charset="UTF-8" />
     <title>PahanaEdu Book Shop - Login</title>
     <style>
-        /* Your existing CSS styles - unchanged */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #1e3c72, #2a5298);
             background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             color: white;
         }
 
@@ -125,7 +117,6 @@
 
 <script>
     document.getElementById("loginForm").addEventListener("submit", function(event) {
-        // Client-side role validation before submit
         const roleSelect = document.getElementById("role");
         if (!roleSelect.value) {
             event.preventDefault();
@@ -135,18 +126,17 @@
 </script>
 
 <%
-    // Show login error message set as request attribute
     String loginError = (String) request.getAttribute("loginError");
 
-    // Show login success message potentially set as session attribute (because redirect loses request attribute)
     String loginSuccess = null;
     if (session != null) {
         loginSuccess = (String) session.getAttribute("loginSuccess");
         if (loginSuccess != null) {
-            session.removeAttribute("loginSuccess"); // Remove after showing once
+            session.removeAttribute("loginSuccess");
         }
     }
 %>
+
 <script>
     <% if (loginError != null) { %>
     alert("<%= loginError.replace("\"", "\\\"") %>");
@@ -156,5 +146,4 @@
 </script>
 
 </body>
->>>>>>> bf992412cd3a6a01e28f6e8aa90f3d557278dde1
 </html>

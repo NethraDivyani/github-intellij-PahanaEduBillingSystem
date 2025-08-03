@@ -1,3 +1,7 @@
+package com.pahanaedu.billing.dao;
+
+import com.pahanaedu.billing.model.Customer;
+
 import java.sql.*;
 
 public class CustomerDAO {
