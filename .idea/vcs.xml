@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
+<<<<<<< HEAD
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+=======
+    <mapping directory="$PROJECT_DIR$/github-intellij-PahanaEduBillingSystem" vcs="Git" />
+>>>>>>> bf992412cd3a6a01e28f6e8aa90f3d557278dde1
   </component>
 </project>
