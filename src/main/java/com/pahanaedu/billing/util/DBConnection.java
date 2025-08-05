@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class DBConnection {
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/pahan_edu"; // Correct DB name
-    private static final String JDBC_USERNAME = "root";  // Replace with your MySQL username
-    private static final String JDBC_PASSWORD = "root";  // Replace with your MySQL password
+    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/pahan_edu";
+    private static final String JDBC_USERNAME = "root";
+    private static final String JDBC_PASSWORD = "root";
 
     public static Connection getConnection() {
         try {
@@ -18,6 +18,4 @@ public class DBConnection {
             return null;
         }
     }
-    String sql = "INSERT INTO customer (account_no, cust_name, address, telephone, email, password, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
 }

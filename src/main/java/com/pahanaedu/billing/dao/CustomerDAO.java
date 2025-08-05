@@ -1,26 +1,27 @@
 package com.pahanaedu.billing.dao;
 
 import com.pahanaedu.billing.model.Customer;
-
+import com.pahanaedu.billing.util.DBConnection;
 import java.sql.*;
 
 public class CustomerDAO {
-    private Connection connection;
+    public boolean insertCustomer(Customer customer) {
+        String sql = "INSERT INTO customer (account_no, cust_name, address, telephone, email, password, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    public CustomerDAO(Connection connection) {
-        this.connection = connection;
-    }
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-    public boolean addCustomer(Customer customer) {
-        String sql = "INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)";
+            ps.setString(1, customer.getAccountNo());
+            ps.setString(2, customer.getCustName());
+            ps.setString(3, customer.getAddress());
+            ps.setString(4, customer.getTelephone());
+            ps.setString(5, customer.getEmail());
+            ps.setString(6, customer.getPassword());
+            ps.setString(7, customer.getStatus());
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, customer.getName());
-            stmt.setString(2, customer.getEmail());
-            stmt.setString(3, customer.getPhone());
+            int rows = ps.executeUpdate();
+            return rows > 0;
 
-            int rowsInserted = stmt.executeUpdate();
-            return rowsInserted > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -155,32 +155,33 @@
   <!-- 1. Add New Customer -->
   <section id="newCustomerSection" class="active">
     <h2>Add New Customer Account</h2>
-    <form id="addCustomerForm">
+    <form method="post" action="AddCustomerServlet" id="addCustomerForm">
+
       <label for="newAccountNumber">Account Number</label>
-      <input type="number" id="newAccountNumber" required />
+      <input type="number" id="newAccountNumber" name="accountNo" required />
 
       <label for="newName">Name</label>
-      <input type="text" id="newName" required />
+      <input type="text" id="newName" name="custName" required />
 
       <label for="newAddress">Address</label>
-      <textarea id="newAddress" rows="3" required></textarea>
+      <textarea id="newAddress" name="address" rows="3" required></textarea>
 
       <label for="newTelephone">Telephone Number</label>
-      <input
-              type="tel"
-              id="newTelephone"
-              required
-              pattern="^\d{10}$"
-              placeholder="Enter exactly 10 digits"
-              title="Telephone number must be exactly 10 digits"
-      />
+      <input type="tel" id="newTelephone" name="telephone" required pattern="^\d{10}$" placeholder="Enter exactly 10 digits" title="Telephone number must be exactly 10 digits" />
 
       <label for="newEmail">Email</label>
-      <input type="email" id="newEmail" required />
+      <input type="email" id="newEmail" name="email" required />
+
+      <!-- Optionally, add password and status fields -->
+      <label for="newPassword">Password</label>
+      <input type="password" id="newPassword" name="password" required />
+
+      <input type="hidden" name="status" value="active" />
 
       <button type="submit" class="submit-btn">Add Customer</button>
       <div id="addCustomerMsg" class="info-message"></div>
     </form>
+
   </section>
 
   <!-- 2. Edit Customer -->
@@ -212,7 +213,7 @@
   <section id="manageItemsSection">
     <h2>Manage Item Information</h2>
 
-    <!-- Add/update item form -->
+    <!-- Manage item form -->
     <form id="itemForm">
       <input type="hidden" id="itemId" /> <!-- hidden field for update -->
 
@@ -231,7 +232,7 @@
       <label for="itemCategory">Category</label>
       <input type="text" id="itemCategory" />
 
-      <button type="submit" class="submit-btn">Add / Update Item</button>
+      <button type="submit" class="submit-btn">Add Item</button>
       <div id="itemFormMsg" class="info-message"></div>
     </form>
 
@@ -320,9 +321,13 @@
 
   /*** 1. Add New Customer Logic ***/
   document.getElementById('addCustomerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    resetMessages();
+    e.preventDefault();  // Prevent normal form submit (page reload)
 
+    resetMessages();
+    const form = this;
+    const msgDiv = document.getElementById('addCustomerMsg');
+
+    // Collect form data values
     const accountNumber = Number(document.getElementById('newAccountNumber').value.trim());
     const name = document.getElementById('newName').value.trim();
     const address = document.getElementById('newAddress').value.trim();
@@ -332,25 +337,54 @@
     // Validate telephone number: exactly 10 digits
     const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(telephone)) {
-      const msgDiv = document.getElementById('addCustomerMsg');
       msgDiv.textContent = 'Invalid telephone number: must be exactly 10 digits.';
       msgDiv.className = 'error-message';
       return;
     }
 
-    if (customers.find(c => c.accountNumber === accountNumber)) {
-      const msgDiv = document.getElementById('addCustomerMsg');
+    // Optional: check if accountNumber already exists locally before sending to server
+    // Comment this or move to server validation if needed
+    if (customers && customers.find && customers.find(c => c.accountNumber === accountNumber)) {
       msgDiv.textContent = 'Account number already exists!';
       msgDiv.className = 'error-message';
       return;
     }
 
-    customers.push({ accountNumber, name, address, telephone, email });
-    const msgDiv = document.getElementById('addCustomerMsg');
-    msgDiv.textContent = 'Customer added successfully!';
-    msgDiv.className = 'info-message';
+    // Prepare FormData and URLSearchParams for sending to backend
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      params.append(key, value);
+    }
 
-    e.target.reset();
+    // Send data asynchronously to the servlet
+    fetch('AddCustomerServlet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    })
+            .then(response => response.text())
+            .then(text => {
+              if (text.trim() === 'success') {
+                // Update your local customers list if needed (optional)
+                if (customers && Array.isArray(customers)) {
+                  customers.push({ accountNumber, name, address, telephone, email });
+                }
+
+                msgDiv.textContent = 'Customer added successfully!';
+                msgDiv.className = 'info-message';
+                form.reset();
+              } else {
+                msgDiv.textContent = 'Failed to add customer.';
+                msgDiv.className = 'error-message';
+              }
+            })
+            .catch(error => {
+              msgDiv.textContent = 'Error: ' + error.message;
+              msgDiv.className = 'error-message';
+            });
   });
 
 
@@ -470,6 +504,7 @@
                 <td>${item.category || ''}</td>
                 <td>
                     <button class="action-btn edit-btn" onclick="editItem(${item.itemId})">Edit</button>
+
                     <button class="action-btn delete-btn" onclick="deleteItem(${item.itemId})">Delete</button>
                 </td>
             `;

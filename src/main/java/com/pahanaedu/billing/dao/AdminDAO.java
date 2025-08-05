@@ -1,4 +1,5 @@
 package com.pahanaedu.billing.dao;
+import com.pahanaedu.billing.model.Customer;
 
 import com.pahanaedu.billing.model.Admin;
 import com.pahanaedu.billing.util.DBConnection;
@@ -57,4 +58,36 @@ public class AdminDAO {
 
         return null; // Login failed
     }
+    // Admin adds a customer
+    public static boolean addCustomer(Customer customer) {
+        boolean result = false;
+
+        try (Connection connection = DBConnection.getConnection()) {
+            String sql = "INSERT INTO customer (account_no, cust_name, address, telephone, email, password, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, customer.getAccountNo());
+            statement.setString(2, customer.getCustName());
+            statement.setString(3, customer.getAddress());
+            statement.setString(4, customer.getTelephone());
+            statement.setString(5, customer.getEmail());
+
+            // Hashing the customer password before storing
+            String hashedPassword = BCrypt.hashpw(customer.getPassword(), BCrypt.gensalt());
+            statement.setString(6, hashedPassword);
+
+            statement.setString(7, customer.getStatus());
+
+            result = statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }
+
+
+
+
+
+

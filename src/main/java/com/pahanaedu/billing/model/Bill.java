@@ -73,7 +73,7 @@ public class Bill {
     public void printBillDetails() {
         System.out.println("Bill ID: " + billId);
         System.out.println("Date: " + billDate);
-        System.out.println("Customer: " + (customer != null ? customer.getName() : "Unknown"));
+        System.out.println("Customer: " + (customer != null ? customer.getCustName(): "Unknown"));
         System.out.println("Items bought:");
         if (items != null) {
             for (Item item : items) {
@@ -87,7 +87,7 @@ public class Bill {
     public String toString() {
         return "Bill{" +
                 "billId=" + billId +
-                ", customer=" + (customer != null ? customer.getName() : "null") +
+                ", customer=" + (customer != null ? customer.getCustName() : "null") +
                 ", billDate=" + billDate +
                 ", totalAmount=" + totalAmount +
                 '}';
