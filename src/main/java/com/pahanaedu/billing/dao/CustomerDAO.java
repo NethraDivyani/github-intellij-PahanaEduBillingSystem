@@ -1,4 +1,4 @@
-package com.pahanaedu.billing.dao;
+/*package com.pahanaedu.billing.dao;
 
 import com.pahanaedu.billing.model.Customer;
 import com.pahanaedu.billing.util.DBConnection;
@@ -28,3 +28,4 @@ public class CustomerDAO {
         }
     }
 }
+*/
