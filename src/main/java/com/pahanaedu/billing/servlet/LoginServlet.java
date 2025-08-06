@@ -2,6 +2,8 @@ package com.pahanaedu.billing.servlet;
 
 import com.pahanaedu.billing.dao.AdminDAO;
 import com.pahanaedu.billing.model.Admin;
+import com.pahanaedu.billing.dao.CashierDAO;
+import com.pahanaedu.billing.model.Cashier;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -43,7 +45,29 @@ public class LoginServlet extends HttpServlet {
                 break;
 
             case "cashier":
-                // TODO: Implement Cashier login logic
+                CashierDAO cashierDAO = new CashierDAO();
+                Cashier cashier = null;
+                try {
+                    cashier = cashierDAO.authenticate(username, password);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("loginError", "System error occurred. Please try again later.");
+                    request.getRequestDispatcher("index.jsp").forward(request, response);
+                    return;
+                }
+
+                if (cashier != null) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("user", cashier);
+                    session.setAttribute("role", "cashier");
+                    session.setAttribute("loginSuccess", "Welcome, " + cashier.getName() + "!");
+                    response.sendRedirect("Cashier.jsp");  // Your cashier dashboard page
+                    return;
+                }
+                // Authentication failed
+                request.setAttribute("loginError", "Invalid username, password, or role.");
+                request.getRequestDispatcher("index.jsp").forward(request, response);
+                
                 break;
 
             case "customer":

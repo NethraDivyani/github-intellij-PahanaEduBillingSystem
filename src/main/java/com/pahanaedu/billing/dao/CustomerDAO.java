@@ -1,31 +1,40 @@
-/*package com.pahanaedu.billing.dao;
+package com.pahanaedu.billing.dao;
 
 import com.pahanaedu.billing.model.Customer;
 import com.pahanaedu.billing.util.DBConnection;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class CustomerDAO {
-    public boolean insertCustomer(Customer customer) {
-        String sql = "INSERT INTO customer (account_no, cust_name, address, telephone, email, password, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    public Customer getCustomerByAccountNo(String accountNo) {
+        Customer customer = null;
+        String sql = "SELECT account_no, cust_name, address, telephone, email, password, status FROM customer WHERE account_no = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setString(1, customer.getAccountNo());
-            ps.setString(2, customer.getCustName());
-            ps.setString(3, customer.getAddress());
-            ps.setString(4, customer.getTelephone());
-            ps.setString(5, customer.getEmail());
-            ps.setString(6, customer.getPassword());
-            ps.setString(7, customer.getStatus());
+            stmt.setString(1, accountNo);
 
-            int rows = ps.executeUpdate();
-            return rows > 0;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    customer = new Customer();
+                    customer.setAccountNo(rs.getString("account_no"));
+                    customer.setCustName(rs.getString("cust_name"));
+                    customer.setAddress(rs.getString("address"));
+                    customer.setTelephone(rs.getString("telephone"));
+                    customer.setEmail(rs.getString("email"));
+                    customer.setPassword(rs.getString("password")); // Usually, you won't display password
+                    customer.setStatus(rs.getString("status"));
+                }
+            }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+
+        return customer;
     }
 }
-*/
