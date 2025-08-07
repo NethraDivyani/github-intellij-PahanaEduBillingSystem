@@ -10,6 +10,7 @@ public class Cashier {
     private String password; // hashed password
     private String name;
     private String email;
+    private String status;
 
     public Cashier(int cashierId, String username, String password, String name, String email) {
         this.cashierId = cashierId;
@@ -59,6 +60,14 @@ public class Cashier {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

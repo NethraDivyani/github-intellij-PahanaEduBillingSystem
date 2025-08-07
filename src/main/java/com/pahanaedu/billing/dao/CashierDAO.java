@@ -11,38 +11,62 @@ import java.sql.SQLException;
 
 public class CashierDAO {
 
-    /**
-     * Authenticate cashier by username and password.
-     * @param username the cashier username
-     * @param password the raw password input
-     * @return Cashier object if authenticated; null otherwise
-     */
+    // Authenticate cashier by username and password
     public Cashier authenticate(String username, String password) {
-        String sql = "SELECT * FROM cashier WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection()) {
+            if (conn == null) {
+                System.out.println("Database connection failed.");
+                return null;
+            }
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String query = "SELECT * FROM cashier WHERE username = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, username);
 
-            stmt.setString(1, username);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String storedHash = rs.getString("password");
-                    if (BCrypt.checkpw(password, storedHash)) {
-                        return new Cashier(
-                                rs.getInt("cashier_id"),
-                                rs.getString("username"),
-                                storedHash,
-                                rs.getString("name"),
-                                rs.getString("email")
-                        );
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        String hashedPassword = rs.getString("password");
+                        if (BCrypt.checkpw(password, hashedPassword)) {
+                            Cashier cashier = new Cashier(
+                                    rs.getInt("cashier_id"),
+                                    rs.getString("username"),
+                                    hashedPassword,
+                                    rs.getString("name"),
+                                    rs.getString("email")
+                            );
+                            return cashier;
+                        }
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // replace with proper logging
+            e.printStackTrace();
         }
 
-        return null;  // authentication failed
+        return null;  // Authentication failed
+    }
+
+    // Add cashier (similar to addCustomer in AdminDAO)
+    public boolean addCashier(Cashier cashier) {
+        boolean result = false;
+
+        String sql = "INSERT INTO cashier (username, password, name, email) VALUES (?, ?, ?, ?)";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            String hashedPassword = BCrypt.hashpw(cashier.getPassword(), BCrypt.gensalt());
+
+            stmt.setString(1, cashier.getUsername());
+            stmt.setString(2, hashedPassword);
+            stmt.setString(3, cashier.getName());
+            stmt.setString(4, cashier.getEmail());
+
+            result = stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

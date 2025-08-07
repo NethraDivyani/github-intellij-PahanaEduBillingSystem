@@ -34,7 +34,9 @@ public class AddCustomerServlet extends HttpServlet {
         customer.setStatus(status);
 
         // Add customer using AdminDAO
-        boolean isAdded = AdminDAO.addCustomer(customer);
+        AdminDAO adminDAO = new AdminDAO();
+        boolean isAdded = adminDAO.addCustomer(customer);
+
         response.setContentType("text/plain");
         if (isAdded) {
             response.getWriter().write("success");
