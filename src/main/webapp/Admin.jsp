@@ -326,7 +326,6 @@
     resetMessages();
     const form = this;
     const msgDiv = document.getElementById('addCustomerMsg');
-    const msgDiv = document.getElementById('addCustomerMsg');
 
     // Collect form data values
     const accountNumber = Number(document.getElementById('newAccountNumber').value.trim());

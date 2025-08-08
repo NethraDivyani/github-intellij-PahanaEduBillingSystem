@@ -1,6 +1,6 @@
 package com.pahanaedu.billing.servlet;
 
-import com.pahanaedu.billing.dao.CustomerDAO;
+import com.pahanaedu.billing.dao.AdminDAO;
 import com.pahanaedu.billing.model.Customer;
 
 import javax.servlet.ServletException;
@@ -45,7 +45,7 @@ public class AddCustomerServlet extends HttpServlet {
         customer.setPassword(password.trim());
         customer.setStatus(status.trim());
 
-        CustomerDAO dao = new CustomerDAO();
+        AdminDAO dao = new AdminDAO();
         boolean added = dao.addCustomer(customer);
 
         response.setContentType("text/plain");
