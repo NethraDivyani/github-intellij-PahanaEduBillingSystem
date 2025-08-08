@@ -1,6 +1,6 @@
 package com.pahanaedu.billing.servlet;
 
-import com.pahanaedu.billing.dao.AdminDAO;
+import com.pahanaedu.billing.dao.CustomerDAO;
 import com.pahanaedu.billing.model.Customer;
 
 import javax.servlet.ServletException;
@@ -10,11 +10,8 @@ import java.io.IOException;
 
 @WebServlet("/AddCustomerServlet")
 public class AddCustomerServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        // Read parameters
         String accountNo = request.getParameter("accountNo");
         String custName = request.getParameter("custName");
         String address = request.getParameter("address");
@@ -23,28 +20,39 @@ public class AddCustomerServlet extends HttpServlet {
         String password = request.getParameter("password");
         String status = request.getParameter("status");
 
-        // Create Customer object
-        Customer customer = new Customer();
-        customer.setAccountNo(accountNo);
-        customer.setCustName(custName);
-        customer.setAddress(address);
-        customer.setTelephone(telephone);
-        customer.setEmail(email);
-        customer.setPassword(password);
-        customer.setStatus(status);
+        if (accountNo == null || accountNo.trim().isEmpty() ||
+                custName == null || custName.trim().isEmpty() ||
+                address == null || address.trim().isEmpty() ||
+                telephone == null || telephone.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
 
-        // Add customer using AdminDAO
-        AdminDAO adminDAO = new AdminDAO();
-        boolean isAdded = adminDAO.addCustomer(customer);
+            response.setContentType("text/plain");
+            response.getWriter().write("failure");
+            return;
+        }
+
+        if (status == null || status.trim().isEmpty()) {
+            status = "active";
+        }
+
+        Customer customer = new Customer();
+        customer.setAccountNo(accountNo.trim());
+        customer.setCustName(custName.trim());
+        customer.setAddress(address.trim());
+        customer.setTelephone(telephone.trim());
+        customer.setEmail(email.trim());
+        customer.setPassword(password.trim());
+        customer.setStatus(status.trim());
+
+        CustomerDAO dao = new CustomerDAO();
+        boolean added = dao.addCustomer(customer);
 
         response.setContentType("text/plain");
-        if (isAdded) {
+        if (added) {
             response.getWriter().write("success");
         } else {
             response.getWriter().write("failure");
         }
-
-
-
     }
 }
