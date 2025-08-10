@@ -4,7 +4,6 @@ import com.pahanaedu.billing.model.Admin;
 import com.pahanaedu.billing.model.Cashier;
 import com.pahanaedu.billing.model.Customer;
 import com.pahanaedu.billing.util.DBConnection;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +17,7 @@ import java.sql.SQLException;
 public class AdminDAO {
 
     /**
-     * Authenticate admin user by username and password.
+     * Authenticate admin user by username and password (plain text match).
      *
      * @param username the admin username to authenticate
      * @param password the raw password entered
@@ -30,7 +29,7 @@ public class AdminDAO {
             return null;
         }
 
-        String query = "SELECT * FROM admin WHERE username = ?";
+        String query = "SELECT * FROM admin WHERE username = ? AND password = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -41,32 +40,28 @@ public class AdminDAO {
             }
 
             stmt.setString(1, username);
+            stmt.setString(2, password);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    String hashedPassword = rs.getString("password");
-                    if (BCrypt.checkpw(password, hashedPassword)) {
-                        Admin admin = new Admin();
-                        admin.setAdminId(rs.getInt("admin_id"));
-                        admin.setName(rs.getString("name"));
-                        admin.setUsername(rs.getString("username"));
-                        admin.setEmail(rs.getString("email"));
-                        // Do not expose password hash externally
-                        return admin;
-                    }
+                    Admin admin = new Admin();
+                    admin.setAdminId(rs.getInt("admin_id"));
+                    admin.setName(rs.getString("name"));
+                    admin.setUsername(rs.getString("username"));
+                    admin.setEmail(rs.getString("email"));
+                    admin.setPassword(rs.getString("password")); // plain password
+                    return admin;
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();  // Replace with logging in production
+            e.printStackTrace();
         }
 
         return null;
     }
 
     /**
-     * Add a new customer to the database. Password is hashed before storing.
-     *
-     * @param customer the Customer object to add
-     * @return true if inserted successfully, false otherwise
+     * Add a new customer to the database (plain text password).
      */
     public boolean addCustomer(Customer customer) {
         if (customer == null ||
@@ -86,26 +81,19 @@ public class AdminDAO {
             statement.setString(3, customer.getAddress());
             statement.setString(4, customer.getTelephone());
             statement.setString(5, customer.getEmail());
-
-            // Hash password before storing
-            String hashedPassword = BCrypt.hashpw(customer.getPassword(), BCrypt.gensalt());
-            statement.setString(6, hashedPassword);
-
+            statement.setString(6, customer.getPassword()); // no hashing
             statement.setString(7, customer.getStatus());
 
             return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();  // Replace with logging as needed
+            e.printStackTrace();
         }
         return false;
     }
 
     /**
-     * Add a new cashier user to the cashier table. Password is hashed before storing.
-     *
-     * @param cashier the Cashier object to add
-     * @return true if inserted successfully, false otherwise
+     * Add a new cashier user (plain text password).
      */
     public static boolean addCashier(Cashier cashier) {
         boolean result = false;
@@ -113,19 +101,43 @@ public class AdminDAO {
             String sql = "INSERT INTO cashier (username, password, name, email, status) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, cashier.getUsername());
-
-            // Hash password before storing
-            String hashedPassword = BCrypt.hashpw(cashier.getPassword(), BCrypt.gensalt());
-            stmt.setString(2, hashedPassword);
-
+            stmt.setString(2, cashier.getPassword()); // no hashing
             stmt.setString(3, cashier.getName());
             stmt.setString(4, cashier.getEmail());
             stmt.setString(5, cashier.getStatus());
 
             result = stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace(); // Replace with your logging framework
+            e.printStackTrace();
         }
         return result;
+    }
+
+    /**
+     * Add a new admin user (plain text password).
+     */
+    public boolean addAdmin(Admin admin) {
+        if (admin == null ||
+                admin.getPassword() == null || admin.getPassword().trim().isEmpty() ||
+                admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+            return false;
+        }
+
+        String sql = "INSERT INTO admin (username, password, name, email) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, admin.getUsername());
+            stmt.setString(2, admin.getPassword()); // no hashing
+            stmt.setString(3, admin.getName());
+            stmt.setString(4, admin.getEmail());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
