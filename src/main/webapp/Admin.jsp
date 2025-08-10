@@ -185,29 +185,34 @@
   </section>
 
   <!-- 2. Edit Customer -->
-  <section id="editCustomerSection">
-    <h2>Edit Customer Information</h2>
-    <label for="editAccountNumberSearch">Enter Customer Account Number</label>
-    <input type="number" id="editAccountNumberSearch" />
-    <button onclick="loadCustomerForEdit()">Search</button>
+  <section id="editCustomerSection" style="padding: 20px;">
+    <h2>Edit Customer Info</h2>
 
+    <label for="editAccountNumberSearch">Enter Account Number to Edit:</label>
+    <input type="number" id="editAccountNumberSearch" placeholder="Enter account number" />
+    <button type="button" onclick="loadCustomerForEdit()">Load Customer</button>
+
+    <!-- The existing edit form -->
     <form id="editCustomerForm" style="display:none; margin-top:20px;">
+      <input type="hidden" id="editAccountNoHidden" name="accountNo" />
+
       <label for="editName">Name</label>
-      <input type="text" id="editName" required />
+      <input type="text" id="editName" name="custName" required />
 
       <label for="editAddress">Address</label>
-      <textarea id="editAddress" rows="3" required></textarea>
+      <textarea id="editAddress" name="address" rows="3" required></textarea>
 
       <label for="editTelephone">Telephone Number</label>
-      <input type="tel" id="editTelephone" required pattern="^\d{10,15}$" />
+      <input type="tel" id="editTelephone" name="telephone" required pattern="^\d{10,15}$" />
 
       <label for="editEmail">Email</label>
-      <input type="email" id="editEmail" required />
+      <input type="email" id="editEmail" name="email" required />
 
       <button type="submit" class="submit-btn">Update Customer</button>
       <div id="editCustomerMsg" class="info-message"></div>
     </form>
   </section>
+
 
   <!-- 3. Manage Items -->
   <section id="manageItemsSection">
@@ -390,52 +395,44 @@
 
   /*** 2. Edit Customer Logic ***/
   function loadCustomerForEdit() {
-    resetMessages();
-    const accNum = Number(document.getElementById('editAccountNumberSearch').value.trim());
+    const accNumInput = document.getElementById('editAccountNumberSearch');
+    const accNum = Number(accNumInput.value.trim());
+
     if (!accNum) {
       alert('Please enter a valid account number.');
       return;
     }
-    const customer = customers.find(c => c.accountNumber === accNum);
-    if (!customer) {
-      alert('Customer not found.');
-      document.getElementById('editCustomerForm').style.display = 'none';
-      return;
-    }
-    document.getElementById('editName').value = customer.name;
-    document.getElementById('editAddress').value = customer.address;
-    document.getElementById('editTelephone').value = customer.telephone;
-    document.getElementById('editEmail').value = customer.email;
-    document.getElementById('editCustomerForm').style.display = 'block';
+
+    // Fetch all customers from server first
+    fetch('GetAllCustomersServlet')
+            .then(response => response.json())
+            .then(data => {
+              customers = data; // update local array
+
+              const customer = customers.find(c => c.accountNumber === accNum);
+              if (!customer) {
+                alert('Customer not found!');
+                document.getElementById('editCustomerForm').style.display = 'none';
+                return;
+              }
+
+              // Populate form fields
+              document.getElementById('editAccountNoHidden').value = customer.accountNumber; // <-- ADD THIS LINE
+              document.getElementById('editName').value = customer.name || '';
+              document.getElementById('editAddress').value = customer.address || '';
+              document.getElementById('editTelephone').value = customer.telephone || '';
+              document.getElementById('editEmail').value = customer.email || '';
+
+              // Show the form
+              document.getElementById('editCustomerForm').style.display = 'block';
+
+              // Clear previous messages
+              document.getElementById('editCustomerMsg').textContent = '';
+            })
+            .catch(() => {
+              alert('Failed to fetch customer data.');
+            });
   }
-
-  document.getElementById('editCustomerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    resetMessages();
-
-    const accNum = Number(document.getElementById('editAccountNumberSearch').value.trim());
-    const name = document.getElementById('editName').value.trim();
-    const address = document.getElementById('editAddress').value.trim();
-    const telephone = document.getElementById('editTelephone').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
-
-    const customer = customers.find(c => c.accountNumber === accNum);
-    if (!customer) {
-      const msgDiv = document.getElementById('editCustomerMsg');
-      msgDiv.textContent = 'Customer not found!';
-      msgDiv.className = 'error-message';
-      return;
-    }
-
-    customer.name = name;
-    customer.address = address;
-    customer.telephone = telephone;
-    customer.email = email;
-
-    const msgDiv = document.getElementById('editCustomerMsg');
-    msgDiv.textContent = 'Customer updated successfully!';
-    msgDiv.className = 'info-message';
-  });
 
   /*** 3. Manage Items Logic ***/
   document.getElementById('itemForm').addEventListener('submit', function(e) {
@@ -534,21 +531,30 @@
   function loadAllCustomers() {
     const tbody = document.querySelector('#customersTable tbody');
     tbody.innerHTML = '';
-    if (customers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No customers available.</td></tr>';
-      return;
-    }
-    customers.forEach(cust => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-                <td>${cust.accountNumber}</td>
-                <td>${cust.name}</td>
-                <td>${cust.address}</td>
-                <td>${cust.telephone}</td>
-                <td>${cust.email}</td>
-            `;
-      tbody.appendChild(tr);
-    });
+
+    fetch('GetAllCustomersServlet')
+            .then(response => response.json())
+            .then(data => {
+              customers = data; // update local array
+              if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No customers available.</td></tr>';
+                return;
+              }
+              data.forEach(cust => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${cust.accountNumber}</td>
+          <td>${cust.name}</td>
+          <td>${cust.address}</td>
+          <td>${cust.telephone}</td>
+          <td>${cust.email}</td>
+        `;
+                tbody.appendChild(tr);
+              });
+            })
+            .catch(() => {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Failed to load customers.</td></tr>';
+            });
   }
 
   /*** Logout Function ***/

@@ -11,7 +11,8 @@ public class CustomerDAO {
 
     public Customer getCustomerByAccountNo(String accountNo) {
         Customer customer = null;
-        String sql = "SELECT account_no, cust_name, address, telephone, email, password, status FROM customer WHERE account_no = ?";
+        String sql = "SELECT * FROM customers WHERE account_number = ?";
+
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
