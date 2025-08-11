@@ -396,43 +396,65 @@
   /*** 2. Edit Customer Logic ***/
   function loadCustomerForEdit() {
     const accNumInput = document.getElementById('editAccountNumberSearch');
-    const accNum = Number(accNumInput.value.trim());
+    const accNum = accNumInput.value.trim();
 
     if (!accNum) {
       alert('Please enter a valid account number.');
       return;
     }
 
-    // Fetch all customers from server first
+    // Fetch from server
     fetch('GetAllCustomersServlet')
             .then(response => response.json())
             .then(data => {
-              customers = data; // update local array
+              customers = data;
+              const customer = customers.find(c => c.accountNumber == accNum); // Use == to match string/number
 
-              const customer = customers.find(c => c.accountNumber === accNum);
               if (!customer) {
                 alert('Customer not found!');
                 document.getElementById('editCustomerForm').style.display = 'none';
                 return;
               }
 
-              // Populate form fields
-              document.getElementById('editAccountNoHidden').value = customer.accountNumber; // <-- ADD THIS LINE
+              document.getElementById('editAccountNoHidden').value = customer.accountNumber;
               document.getElementById('editName').value = customer.name || '';
               document.getElementById('editAddress').value = customer.address || '';
               document.getElementById('editTelephone').value = customer.telephone || '';
               document.getElementById('editEmail').value = customer.email || '';
-
-              // Show the form
               document.getElementById('editCustomerForm').style.display = 'block';
-
-              // Clear previous messages
-              document.getElementById('editCustomerMsg').textContent = '';
             })
-            .catch(() => {
+            .catch(err => {
+              console.error(err);
               alert('Failed to fetch customer data.');
             });
   }
+  // Edit Customer form submit logic
+  document.getElementById('editCustomerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const params = new URLSearchParams(new FormData(this));
+
+    fetch('UpdateCustomerServlet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+            .then(response => response.text())
+            .then(result => {
+              if (result.trim() === 'success') {
+                document.getElementById('editCustomerMsg').textContent = 'Customer updated successfully!';
+                document.getElementById('editCustomerMsg').className = 'info-message';
+              } else {
+                document.getElementById('editCustomerMsg').textContent = 'Failed to update customer.';
+                document.getElementById('editCustomerMsg').className = 'error-message';
+              }
+            })
+            .catch(error => {
+              document.getElementById('editCustomerMsg').textContent = 'Error: ' + error.message;
+              document.getElementById('editCustomerMsg').className = 'error-message';
+            });
+  });
+
 
   /*** 3. Manage Items Logic ***/
   document.getElementById('itemForm').addEventListener('submit', function(e) {
@@ -453,79 +475,42 @@
       return;
     }
 
-    if (idText) {
-      const id = Number(idText);
-      const item = items.find(i => i.itemId === id);
-      if (item) {
-        item.name = name;
-        item.description = description;
-        item.price = price;
-        item.quantityAvailable = quantity;
-        item.category = category;
-        const msgDiv = document.getElementById('itemFormMsg');
-        msgDiv.textContent = 'Item updated successfully!';
-        msgDiv.className = 'info-message';
-      }
-    } else {
-      const newId = items.length > 0 ? Math.max(...items.map(i => i.itemId)) + 1 : 1;
-      items.push({
-        itemId: newId,
-        name,
-        description,
-        price,
-        quantityAvailable: quantity,
-        category
-      });
-      const msgDiv = document.getElementById('itemFormMsg');
-      msgDiv.textContent = 'Item added successfully!';
-      msgDiv.className = 'info-message';
-    }
+    // Prepare data to send
+    const params = new URLSearchParams();
+    if(idText) params.append('itemId', idText);  // for update
+    params.append('name', name);
+    params.append('description', description);
+    params.append('price', price);
+    params.append('quantityAvailable', quantity);
+    params.append('category', category);
 
-    e.target.reset();
-    document.getElementById('itemId').value = '';
-    renderItemsTable();
+    fetch('AddOrUpdateItemServlet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+            .then(response => response.text())
+            .then(result => {
+              const msgDiv = document.getElementById('itemFormMsg');
+              if(result.trim() === 'success') {
+                msgDiv.textContent = idText ? 'Item updated successfully!' : 'Item added successfully!';
+                msgDiv.className = 'info-message';
+
+                e.target.reset();
+                document.getElementById('itemId').value = '';
+
+                loadItemsFromServer(); // Reload fresh items from DB
+              } else {
+                msgDiv.textContent = 'Failed to save item.';
+                msgDiv.className = 'error-message';
+              }
+            })
+            .catch(error => {
+              const msgDiv = document.getElementById('itemFormMsg');
+              msgDiv.textContent = 'Error: ' + error.message;
+              msgDiv.className = 'error-message';
+            });
   });
-
-  // Render items table
-  function renderItemsTable() {
-    const tbody = document.querySelector('#itemsTable tbody');
-    tbody.innerHTML = '';
-    items.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-                <td>${item.itemId}</td>
-                <td>${item.name}</td>
-                <td>${item.description || ''}</td>
-                <td>${item.price.toFixed(2)}</td>
-                <td>${item.quantityAvailable}</td>
-                <td>${item.category || ''}</td>
-                <td>
-                    <button class="action-btn edit-btn" onclick="editItem(${item.itemId})">Edit</button>
-
-                    <button class="action-btn delete-btn" onclick="deleteItem(${item.itemId})">Delete</button>
-                </td>
-            `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function editItem(itemId) {
-    const item = items.find(i => i.itemId === itemId);
-    if (!item) return;
-    document.getElementById('itemId').value = item.itemId;
-    document.getElementById('itemName').value = item.name;
-    document.getElementById('itemDescription').value = item.description;
-    document.getElementById('itemPrice').value = item.price;
-    document.getElementById('itemQuantity').value = item.quantityAvailable;
-    document.getElementById('itemCategory').value = item.category;
-    showSection('manageItemsSection');
-  }
-
-  function deleteItem(itemId) {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-    items = items.filter(i => i.itemId !== itemId);
-    renderItemsTable();
-  }
 
   /*** 4. Display Customer Accounts ***/
   function loadAllCustomers() {
