@@ -1,50 +1,31 @@
 package com.pahanaedu.billing.model;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-
-public class Admin implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Admin {
     private int adminId;
-    private String username;
-    private String passwordHash; // Store only hashed password here
     private String name;
+    private String username;
     private String email;
+    private String password;
 
-    public Admin() { }
+    // Default constructor
+    public Admin() {}
 
-    public Admin(int adminId, String username, String passwordHash, String name, String email, String telephone, Timestamp createdAt) {
+    // Parameterized constructor
+    public Admin(int adminId, String name, String username, String email, String password) {
         this.adminId = adminId;
-        this.username = username;
-        this.passwordHash = passwordHash;
         this.name = name;
+        this.username = username;
         this.email = email;
+        this.password = password;
     }
 
+    // Getters and setters
     public int getAdminId() {
         return adminId;
     }
 
     public void setAdminId(int adminId) {
         this.adminId = adminId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    // Note: No getter for passwordHash to avoid exposing
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
     }
 
     public String getName() {
@@ -55,6 +36,14 @@ public class Admin implements Serializable {
         this.name = name;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -63,16 +52,22 @@ public class Admin implements Serializable {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String toString() {
         return "Admin{" +
                 "adminId=" + adminId +
-                ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
+                ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 '}';
+
     }
-
-    // Optionally, implement equals() and hashCode() here based on adminId or username
-
 }

@@ -1,14 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    String loginError = (String) request.getAttribute("loginError");
-    String loginSuccess = (String) request.getAttribute("loginSuccess");
-%>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>PahanaEdu Book Shop - Login</title>
+    <title>PahanaEdu Book Shop - Registration</title>
     <style>
         body, html {
             margin: 0;
@@ -71,7 +66,7 @@
         }
 
         button {
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -79,7 +74,7 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #1e7e34;
         }
 
         @media (max-width: 480px) {
@@ -97,50 +92,53 @@
 </head>
 <body>
 <div class="overlay">
-    <div class="title-banner">PahanaEdu Book Shop</div>
+    <div class="title-banner">Register</div>
 
     <div class="login-container">
-        <form id="loginForm" method="post" action="LoginServlet" autocomplete="off">
+        <form method="post" action="RegisterServlet" autocomplete="off">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required />
+
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required aria-label="Username" />
+            <input type="text" id="username" name="username" required />
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required aria-label="Password" />
+            <input type="password" id="password" name="password" required />
 
-            <label for="role">Select Role:</label>
-            <select id="role" name="role" required aria-label="User Role">
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
                 <option value="" disabled selected>-- Select Role --</option>
                 <option value="admin">Admin</option>
-                <option value="cashier">Cashier</option>
                 <option value="customer">Customer</option>
+                <option value="cashier">Cashier</option>
             </select>
 
-            <button type="submit">Login</button>
+            <!-- For Customer only -->
+            <div id="customerFields" style="display:none;">
+                <label for="accountNo">Account No:</label>
+                <input type="text" id="accountNo" name="accountNo" />
 
-            <!-- Register button -->
-            <button type="button" onclick="window.location.href='Register.jsp'" style="margin-top:10px; background-color:#28a745;">
-                Register
-            </button>
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" />
+
+                <label for="telephone">Telephone:</label>
+                <input type="text" id="telephone" name="telephone" />
+            </div>
+
+            <button type="submit">Register</button>
         </form>
-
     </div>
 </div>
 
 <script>
-    document.getElementById("loginForm").addEventListener("submit", function(event) {
-        const roleSelect = document.getElementById("role");
-        if (!roleSelect.value) {
-            event.preventDefault();
-            alert("Please select your user role.");
-        }
+    document.getElementById('role').addEventListener('change', function() {
+        document.getElementById('customerFields').style.display =
+            this.value === 'customer' ? 'block' : 'none';
     });
 </script>
-<script>
-    <% if (loginError != null) { %>
-    alert("<%= loginError.replace("\"", "\\\"").replace("\n", "\\n") %>");
-    <% } else if (loginSuccess != null) { %>
-    alert("<%= loginSuccess.replace("\"", "\\\"").replace("\n", "\\n") %>");
-    <% } %>
-</script>
+
 </body>
 </html>
