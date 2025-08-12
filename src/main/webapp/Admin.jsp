@@ -484,7 +484,10 @@
     params.append('quantityAvailable', quantity);
     params.append('category', category);
 
-    fetch('AddOrUpdateItemServlet', {
+    // Choose URL based on whether this is an update or add
+    const url = idText ? 'EditItemServlet' : 'AddItemServlet';
+
+    fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString()
@@ -492,17 +495,23 @@
             .then(response => response.text())
             .then(result => {
               const msgDiv = document.getElementById('itemFormMsg');
-              if(result.trim() === 'success') {
-                msgDiv.textContent = idText ? 'Item updated successfully!' : 'Item added successfully!';
-                msgDiv.className = 'info-message';
-
-                e.target.reset();
-                document.getElementById('itemId').value = '';
-
-                loadItemsFromServer(); // Reload fresh items from DB
+              if (!idText) {
+                // Adding case
+                if(result.trim() === 'success') {
+                  msgDiv.textContent = 'Item added successfully!';
+                  msgDiv.className = 'info-message';
+                  e.target.reset();
+                  document.getElementById('itemId').value = '';
+                  loadItemsFromServer();
+                } else {
+                  msgDiv.textContent = 'Failed to save item.';
+                  msgDiv.className = 'error-message';
+                }
               } else {
-                msgDiv.textContent = 'Failed to save item.';
-                msgDiv.className = 'error-message';
+                // Updating case
+                msgDiv.textContent = 'Update request sent. Please reload or check updates.';
+                msgDiv.className = 'info-message';
+                loadItemsFromServer();
               }
             })
             .catch(error => {
@@ -511,6 +520,77 @@
               msgDiv.className = 'error-message';
             });
   });
+  function loadItemsFromServer() {
+    fetch('GetItemsServlet')
+            .then(response => response.json())
+            .then(data => {
+              items = data; // update local cache
+
+              const tbody = document.querySelector('#itemsTable tbody');
+              tbody.innerHTML = '';
+
+              if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No items available.</td></tr>';
+                return;
+              }
+
+              items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${item.itemId || ''}</td>
+          <td>${item.name || ''}</td>
+          <td>${item.description || ''}</td>
+          <td>${item.price != null ? item.price.toFixed(2) : ''}</td>
+          <td>${item.quantityAvailable != null ? item.quantityAvailable : ''}</td>
+          <td>${item.category || ''}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editItem(${item.itemId})">Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteItem(${item.itemId})">Delete</button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+              });
+            })
+            .catch(error => {
+              console.error('Error loading items:', error);
+              const tbody = document.querySelector('#itemsTable tbody');
+              tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Failed to load items.</td></tr>';
+            });
+  }
+  function editItem(id) {
+    console.log('Editing item with id:', id);
+    const item = items.find(i => i.itemId == id);
+    if (!item) {
+      alert('Item not found');
+      console.log('Item not found in local items array.');
+      return;
+    }
+    document.getElementById('itemId').value = item.itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemDescription').value = item.description;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemQuantity').value = item.quantityAvailable;
+    document.getElementById('itemCategory').value = item.category;
+
+    showSection('manageItemsSection');
+  }
+
+  function deleteItem(id) {
+    console.log('Deleting item with id:', id);
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    fetch(`DeleteItemServlet?itemId=${id}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(result => {
+              if (result.trim() === 'success') {
+                loadItemsFromServer();
+                alert('Item deleted successfully!');
+              } else {
+                alert('Failed to delete item.');
+              }
+            })
+            .catch(err => alert('Error: ' + err.message));
+  }
 
   /*** 4. Display Customer Accounts ***/
   function loadAllCustomers() {

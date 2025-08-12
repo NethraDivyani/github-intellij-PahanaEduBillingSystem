@@ -12,6 +12,9 @@ import java.sql.PreparedStatement;
 public class AddItemServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/plain;charset=UTF-8");
+
         String name = req.getParameter("name");
         String description = req.getParameter("description");
         String priceStr = req.getParameter("price");
@@ -30,7 +33,8 @@ public class AddItemServlet extends HttpServlet {
         }
 
         try (Connection conn = DBConnection.getConnection()) {
-            String sql = "INSERT INTO item (name, description, price, quantity_available, category) VALUES (?, ?, ?, ?, ?)";
+
+            String sql = "INSERT INTO item (name, description, price, quantityAvailable, category) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, name);
             ps.setString(2, description);

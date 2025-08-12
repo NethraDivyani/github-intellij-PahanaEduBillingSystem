@@ -8,8 +8,8 @@ import java.util.List;
 
 public class ItemDAO {
     private final String jdbcURL = "jdbc:mysql://localhost:3306/pahan_edu";
-    private final String jdbcUsername = "your_username";
-    private final String jdbcPassword = "your_password";
+    private final String jdbcUsername = "root";
+    private final String jdbcPassword = "root";
 
     public ItemDAO() {
         try {
@@ -25,7 +25,7 @@ public class ItemDAO {
 
     // Create a new item record
     public boolean addItem(Item item) {
-        String sql = "INSERT INTO item (name, description, price, quantity_available, category) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO item (name, description, price, quantityAvailable, category) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -65,7 +65,7 @@ public class ItemDAO {
 
     // Update existing item details (changed from static to instance method)
     public boolean updateItem(Item item) {
-        String sql = "UPDATE item SET name = ?, description = ?, price = ?, quantity_available = ?, category = ? WHERE itemId = ?";
+        String sql = "UPDATE item SET name = ?, description = ?, price = ?, quantityAvailable = ?, category = ? WHERE itemId = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -127,7 +127,7 @@ public class ItemDAO {
         item.setName(rs.getString("name"));
         item.setDescription(rs.getString("description"));
         item.setPrice(rs.getDouble("price"));
-        item.setQuantityAvailable(rs.getInt("quantity_available"));
+        item.setQuantityAvailable(rs.getInt("quantityAvailable"));
         item.setCategory(rs.getString("category"));
         return item;
     }
