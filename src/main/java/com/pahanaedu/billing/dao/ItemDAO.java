@@ -1,6 +1,7 @@
 package com.pahanaedu.billing.dao;
 
 import com.pahanaedu.billing.model.Item;
+import com.pahanaedu.billing.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -87,19 +88,19 @@ public class ItemDAO {
 
     // Delete an item by ID
     public boolean deleteItem(int itemId) {
-        String sql = "DELETE FROM item WHERE itemId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, itemId);
-            int rowsDeleted = stmt.executeUpdate();
-            return rowsDeleted > 0;
-
-        } catch (SQLException e) {
+        try {
+            Connection con = DBConnection.getConnection();
+            String sql = "DELETE FROM item WHERE itemId=?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, itemId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
+
 
     // Retrieve all items
     public List<Item> getAllItems() {

@@ -18,13 +18,12 @@ public class EditItemServlet extends HttpServlet {
 
         try {
             int itemId = Integer.parseInt(request.getParameter("itemId"));
-            String itemName = request.getParameter("itemName");
-            String itemDescription = request.getParameter("itemDescription");
-            double itemPrice = Double.parseDouble(request.getParameter("itemPrice"));
-            int itemQuantity = Integer.parseInt(request.getParameter("itemQuantity"));
-            String itemCategory = request.getParameter("itemCategory");
+            String itemName = request.getParameter("name");
+            String itemDescription = request.getParameter("description");
+            double itemPrice = Double.parseDouble(request.getParameter("price"));
+            int itemQuantity = Integer.parseInt(request.getParameter("quantityAvailable"));
+            String itemCategory = request.getParameter("category");
 
-            // Create Item object and set all fields
             Item item = new Item();
             item.setItemId(itemId);
             item.setName(itemName);
@@ -33,19 +32,18 @@ public class EditItemServlet extends HttpServlet {
             item.setQuantityAvailable(itemQuantity);
             item.setCategory(itemCategory);
 
-            // Create ItemDAO instance and call updateItem (instance method)
             ItemDAO itemDAO = new ItemDAO();
             boolean success = itemDAO.updateItem(item);
 
-            if (success) {
-                response.sendRedirect("itemList.jsp?status=updated");
+            if(success) {
+                response.getWriter().print("success");
             } else {
-                response.sendRedirect("editItem.jsp?status=failed");
+                response.getWriter().print("fail");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("editItem.jsp?status=error");
+            response.getWriter().print("error");
         }
     }
 }

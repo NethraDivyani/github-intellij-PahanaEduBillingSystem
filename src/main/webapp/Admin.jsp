@@ -237,9 +237,13 @@
       <label for="itemCategory">Category</label>
       <input type="text" id="itemCategory" />
 
-      <button type="submit" class="submit-btn">Add Item</button>
+      <button type="button" id="addItemBtn" class="submit-btn">Add Item</button>
+      <button type="button" id="editItemBtn" class="submit-btn">Save Item</button>
+      <button type="button" id="clearFormBtn" class="submit-btn">Clear Item</button>
+
       <div id="itemFormMsg" class="info-message"></div>
     </form>
+
 
     <!-- Item list -->
     <table id="itemsTable" style="margin-top: 20px;">
@@ -457,11 +461,12 @@
 
 
   /*** 3. Manage Items Logic ***/
-  document.getElementById('itemForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    resetMessages();
+  // Load items initially
+  loadItemsFromServer();
 
-    const idText = document.getElementById('itemId').value;
+  // Add Item
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    resetMessages();
     const name = document.getElementById('itemName').value.trim();
     const description = document.getElementById('itemDescription').value.trim();
     const price = parseFloat(document.getElementById('itemPrice').value);
@@ -469,63 +474,116 @@
     const category = document.getElementById('itemCategory').value.trim();
 
     if (!name || isNaN(price) || isNaN(quantity)) {
-      const msgDiv = document.getElementById('itemFormMsg');
-      msgDiv.textContent = 'Please fill in required fields with valid values.';
-      msgDiv.className = 'error-message';
+      showMessage('Please fill in required fields with valid values.', 'error');
       return;
     }
 
-    // Prepare data to send
     const params = new URLSearchParams();
-    if(idText) params.append('itemId', idText);  // for update
     params.append('name', name);
     params.append('description', description);
     params.append('price', price);
     params.append('quantityAvailable', quantity);
     params.append('category', category);
 
-    // Choose URL based on whether this is an update or add
-    const url = idText ? 'EditItemServlet' : 'AddItemServlet';
-
-    fetch(url, {
+    fetch('AddItemServlet', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString()
     })
-            .then(response => response.text())
+            .then(res => res.text())
             .then(result => {
-              const msgDiv = document.getElementById('itemFormMsg');
-              if (!idText) {
-                // Adding case
-                if(result.trim() === 'success') {
-                  msgDiv.textContent = 'Item added successfully!';
-                  msgDiv.className = 'info-message';
-                  e.target.reset();
-                  document.getElementById('itemId').value = '';
-                  loadItemsFromServer();
-                } else {
-                  msgDiv.textContent = 'Failed to save item.';
-                  msgDiv.className = 'error-message';
-                }
-              } else {
-                // Updating case
-                msgDiv.textContent = 'Update request sent. Please reload or check updates.';
-                msgDiv.className = 'info-message';
+              if (result.trim() === 'success') {
+                showMessage('Item added successfully!', 'info');
+                clearForm();
                 loadItemsFromServer();
+              } else {
+                showMessage('Failed to add item.', 'error');
               }
             })
-            .catch(error => {
-              const msgDiv = document.getElementById('itemFormMsg');
-              msgDiv.textContent = 'Error: ' + error.message;
-              msgDiv.className = 'error-message';
-            });
+            .catch(err => showMessage('Error: ' + err.message, 'error'));
   });
+
+  // Edit / Save Item
+  document.getElementById('editItemBtn').addEventListener('click', () => {
+    resetMessages();
+    const itemId = document.getElementById('itemId').value;
+    if (!itemId) {
+      showMessage('No item selected to edit.', 'error');
+      return;
+    }
+
+    const name = document.getElementById('itemName').value.trim();
+    const description = document.getElementById('itemDescription').value.trim();
+    const price = parseFloat(document.getElementById('itemPrice').value);
+    const quantity = Number(document.getElementById('itemQuantity').value);
+    const category = document.getElementById('itemCategory').value.trim();
+
+    if (!name || isNaN(price) || isNaN(quantity)) {
+      showMessage('Please fill in required fields with valid values.', 'error');
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('itemId', itemId);
+    params.append('name', name);
+    params.append('description', description);
+    params.append('price', price);
+    params.append('quantityAvailable', quantity);
+    params.append('category', category);
+
+    fetch('EditItemServlet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+            .then(res => res.text())
+            .then(result => {
+              if (result.trim() === 'success') {
+                showMessage('Item updated successfully!', 'info');
+                clearForm();
+                loadItemsFromServer();
+              } else {
+                showMessage('Failed to update item.', 'error');
+              }
+            })
+            .catch(err => showMessage('Error: ' + err.message, 'error'));
+  });
+
+  // Clear Form
+  document.getElementById('clearFormBtn').addEventListener('click', () => {
+    clearForm();
+  });
+
+  // Populate form for editing
+  window.populateEditForm = function(id) {
+    const item = items.find(i => i.itemId == id);
+    if (!item) return alert('Item not found.');
+    document.getElementById('itemId').value = item.itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemDescription').value = item.description;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemQuantity').value = item.quantityAvailable;
+    document.getElementById('itemCategory').value = item.category;
+  };
+
+  // Helper functions
+  function clearForm() {
+    document.getElementById('itemForm').reset();
+    document.getElementById('itemId').value = '';
+  }
+
+  function showMessage(msg, type) {
+    const msgDiv = document.getElementById('itemFormMsg');
+    msgDiv.textContent = msg;
+    msgDiv.className = type === 'error' ? 'error-message' : 'info-message';
+  }
+
+  // Load items from server
   function loadItemsFromServer() {
     fetch('GetItemsServlet')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-              items = data; // update local cache
-
+              items = data;
               const tbody = document.querySelector('#itemsTable tbody');
               tbody.innerHTML = '';
 
@@ -544,43 +602,22 @@
           <td>${item.quantityAvailable != null ? item.quantityAvailable : ''}</td>
           <td>${item.category || ''}</td>
           <td>
-            <button class="action-btn edit-btn" onclick="editItem(${item.itemId})">Edit</button>
+            <button class="action-btn edit-btn" onclick="populateEditForm(${item.itemId})">Edit</button>
             <button class="action-btn delete-btn" onclick="deleteItem(${item.itemId})">Delete</button>
           </td>
         `;
                 tbody.appendChild(tr);
               });
             })
-            .catch(error => {
-              console.error('Error loading items:', error);
-              const tbody = document.querySelector('#itemsTable tbody');
-              tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Failed to load items.</td></tr>';
-            });
-  }
-  function editItem(id) {
-    console.log('Editing item with id:', id);
-    const item = items.find(i => i.itemId == id);
-    if (!item) {
-      alert('Item not found');
-      console.log('Item not found in local items array.');
-      return;
-    }
-    document.getElementById('itemId').value = item.itemId;
-    document.getElementById('itemName').value = item.name;
-    document.getElementById('itemDescription').value = item.description;
-    document.getElementById('itemPrice').value = item.price;
-    document.getElementById('itemQuantity').value = item.quantityAvailable;
-    document.getElementById('itemCategory').value = item.category;
-
-    showSection('manageItemsSection');
+            .catch(err => console.error('Failed to load items:', err));
   }
 
+  // Delete item
   function deleteItem(id) {
-    console.log('Deleting item with id:', id);
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     fetch(`DeleteItemServlet?itemId=${id}`, { method: 'POST' })
-            .then(response => response.text())
+            .then(res => res.text())
             .then(result => {
               if (result.trim() === 'success') {
                 loadItemsFromServer();
@@ -591,7 +628,6 @@
             })
             .catch(err => alert('Error: ' + err.message));
   }
-
   /*** 4. Display Customer Accounts ***/
   function loadAllCustomers() {
     const tbody = document.querySelector('#customersTable tbody');
