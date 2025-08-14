@@ -146,6 +146,7 @@
   <button onclick="showSection('editCustomerSection')">Edit Customer Info</button>
   <button onclick="showSection('manageItemsSection')">Manage Items</button>
   <button onclick="showSection('displayAccountsSection')">Display Accounts</button>
+  <button onclick="showSection('all-bills-section'); loadAllBills()">All Bills</button>
   <button onclick="showSection('helpSection')">Help</button>
   <button onclick="logout()">Logout</button> <!-- Changed from exitSystem to logout -->
 </nav>
@@ -275,7 +276,24 @@
     </table>
   </section>
 
-  <!-- 7. Help Section -->
+    <!--5. All Bills Section -->
+    <section id="all-bills-section">
+      <h2>All Bills</h2>
+      <table id="billsTable">
+        <tr>
+          <th>Bill ID</th>
+          <th>Account Number</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Discount</th>
+          <th>Final Amount</th>
+          <th>Items</th>
+          <th>Actions</th>
+        </tr>
+      </table>
+    </section>
+
+  <!-- 6. Help Section -->
   <section id="helpSection">
     <h2>Help - System Usage Guidelines</h2>
     <h3>Admin User Guide</h3>
@@ -657,12 +675,45 @@
               tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Failed to load customers.</td></tr>';
             });
   }
+  /*** 5. Load All Bills dynamically ***/
+  function loadAllBills() {
+    fetch('GetBillsServlet')
+            .then(res => res.json())
+            .then(bills => {
+              const table = document.getElementById("billsTable");
+              table.innerHTML = `<tr>
+                        <th>Bill ID</th>
+                        <th>Account Number</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Discount</th>
+                        <th>Final Amount</th>
+                        <th>Items</th>
+                    </tr>`;
+              if(bills.length === 0) {
+                table.innerHTML += `<tr><td colspan="8" style="text-align:center;">No bills found.</td></tr>`;
+              }
+              bills.forEach(b => {
+                const items = b.items.map(i => i.name + " ($" + i.price.toFixed(2) + ")").join(", ");
+                table.innerHTML += `<tr>
+                            <td>${b.billId}</td>
+                            <td>${b.accountNumber}</td>
+                            <td>${new Date(b.billDate).toLocaleString()}</td>
+                            <td>$${b.totalAmount.toFixed(2)}</td>
+                            <td>${b.discount.toFixed(2)}%</td>
+                            <td>$${b.finalAmount.toFixed(2)}</td>
+                            <td>${items}</td>
+                        </tr>`;
+              });
+            })
+            .catch(err => console.error("Error loading bills:", err));
+  }
 
   /*** Logout Function ***/
   function logout() {
     if (confirm("Are you sure you want to logout?")) {
-      // Redirect to a logout servlet or clear session manually
-      window.location.href = "LogoutServlet"; // recommended to create a LogoutServlet that invalidates the session
+      // Use window.location.href to call the LogoutServlet
+      window.location.href = "<%=request.getContextPath()%>/LogoutServlet";
     }
   }
 

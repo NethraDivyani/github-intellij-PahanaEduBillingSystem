@@ -32,7 +32,15 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect("Admin.jsp"); // your admin dashboard
             }
         } else if ("cashier".equalsIgnoreCase(role)) {
-            // Similar code for cashier authentication using CashierDAO
+            CashierDAO cashierDAO = new CashierDAO();
+            Cashier cashier = cashierDAO.authenticate(username, password);
+            if (cashier != null) {
+                authenticated = true;
+                request.getSession().setAttribute("user", cashier);
+                request.getSession().setAttribute("role", "cashier");
+                response.sendRedirect("Cashier.jsp"); // cashier dashboard
+                return;
+            }
         } else if ("customer".equalsIgnoreCase(role)) {
             // Similar code for customer authentication using CustomerDAO
         }

@@ -13,11 +13,15 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Invalidate session if it exists
         if (request.getSession(false) != null) {
             request.getSession().invalidate();
         }
-        // Redirect to main page after logout
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("index.jsp"); // adjust path if necessary
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
     }
 }
