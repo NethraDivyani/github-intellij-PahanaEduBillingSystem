@@ -680,31 +680,35 @@
     fetch('GetBillsServlet')
             .then(res => res.json())
             .then(bills => {
-              const table = document.getElementById("billsTable");
-              table.innerHTML = `<tr>
-                        <th>Bill ID</th>
-                        <th>Account Number</th>
-                        <th>Date</th>
-                        <th>Total</th>
-                        <th>Discount</th>
-                        <th>Final Amount</th>
-                        <th>Items</th>
-                    </tr>`;
-              if(bills.length === 0) {
-                table.innerHTML += `<tr><td colspan="8" style="text-align:center;">No bills found.</td></tr>`;
+              let html = `<tr>
+        <th>Bill ID</th>
+        <th>Account Number</th>
+        <th>Date</th>
+        <th>Total</th>
+        <th>Discount</th>
+        <th>Final Amount</th>
+        <th>Items</th>
+      </tr>`;
+
+              if (bills.length === 0) {
+                html += `<tr><td colspan="8" style="text-align:center;">No bills found.</td></tr>`;
+              } else {
+                bills.forEach(b => {
+                  const items = b.items.map(i => `${i.name} ($${i.price.toFixed(2)})`).join(", ");
+                  const formattedDate = new Date(b.billDate).toLocaleString(); // JavaScript handles date
+                  html += `<tr>
+            <td>${b.billId}</td>
+            <td>${b.accountNumber}</td>
+            <td>${formattedDate}</td>
+            <td>$${b.totalAmount.toFixed(2)}</td>
+            <td>${b.discount.toFixed(2)}%</td>
+            <td>$${b.finalAmount.toFixed(2)}</td>
+            <td>${items}</td>
+          </tr>`;
+                });
               }
-              bills.forEach(b => {
-                const items = b.items.map(i => i.name + " ($" + i.price.toFixed(2) + ")").join(", ");
-                table.innerHTML += `<tr>
-                            <td>${b.billId}</td>
-                            <td>${b.accountNumber}</td>
-                            <td>${new Date(b.billDate).toLocaleString()}</td>
-                            <td>$${b.totalAmount.toFixed(2)}</td>
-                            <td>${b.discount.toFixed(2)}%</td>
-                            <td>$${b.finalAmount.toFixed(2)}</td>
-                            <td>${items}</td>
-                        </tr>`;
-              });
+
+              document.getElementById("billsTable").innerHTML = html;
             })
             .catch(err => console.error("Error loading bills:", err));
   }
