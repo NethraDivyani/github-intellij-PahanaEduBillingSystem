@@ -8,6 +8,7 @@ public class Item {
     private int quantityAvailable;
     private String category;
 
+
     // Default constructor
     public Item() {}
 
@@ -87,4 +88,6 @@ public class Item {
                 ", category='" + category + '\'' +
                 '}';
     }
+
+
 }

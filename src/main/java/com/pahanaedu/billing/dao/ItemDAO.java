@@ -63,7 +63,7 @@ public class ItemDAO {
         return null;
     }
 
-    // Update existing item details
+    // Update existing item details (changed from static to instance method)
     public boolean updateItem(Item item) {
         String sql = "UPDATE item SET name = ?, description = ?, price = ?, quantity_available = ?, category = ? WHERE itemId = ?";
         try (Connection conn = getConnection();
