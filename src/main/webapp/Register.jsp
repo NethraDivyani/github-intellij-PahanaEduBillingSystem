@@ -112,33 +112,14 @@
             <select id="role" name="role" required>
                 <option value="" disabled selected>-- Select Role --</option>
                 <option value="admin">Admin</option>
-                <option value="customer">Customer</option>
                 <option value="cashier">Cashier</option>
             </select>
-
-            <!-- For Customer only -->
-            <div id="customerFields" style="display:none;">
-                <label for="accountNo">Account No:</label>
-                <input type="text" id="accountNo" name="accountNo" />
-
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" />
-
-                <label for="telephone">Telephone:</label>
-                <input type="text" id="telephone" name="telephone" />
-            </div>
 
             <button type="submit">Register</button>
         </form>
     </div>
 </div>
 
-<script>
-    document.getElementById('role').addEventListener('change', function() {
-        document.getElementById('customerFields').style.display =
-            this.value === 'customer' ? 'block' : 'none';
-    });
-</script>
 
 </body>
 </html>

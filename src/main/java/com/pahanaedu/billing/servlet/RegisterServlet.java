@@ -20,20 +20,7 @@ public class RegisterServlet extends HttpServlet {
         String role = request.getParameter("role");
         boolean success = false;
 
-        if ("customer".equalsIgnoreCase(role)) {
-            Customer customer = new Customer();
-            customer.setAccountNo(request.getParameter("accountNo"));
-            customer.setCustName(request.getParameter("name"));
-            customer.setAddress(request.getParameter("address"));
-            customer.setTelephone(request.getParameter("telephone"));
-            customer.setEmail(request.getParameter("email"));
-            customer.setPassword(request.getParameter("password"));
-            customer.setStatus("active");
-
-            AdminDAO dao = new AdminDAO();
-            success = dao.addCustomer(customer);
-
-        } else if ("cashier".equalsIgnoreCase(role)) {
+        if ("cashier".equalsIgnoreCase(role)) {
             Cashier cashier = new Cashier();
             cashier.setUsername(request.getParameter("username"));
             cashier.setPassword(request.getParameter("password"));
@@ -42,20 +29,19 @@ public class RegisterServlet extends HttpServlet {
             cashier.setStatus("active");
 
             success = AdminDAO.addCashier(cashier);
+
+        } else if ("admin".equalsIgnoreCase(role)) {
+            Admin admin = new Admin();
+            admin.setUsername(request.getParameter("username"));
+            admin.setPassword(request.getParameter("password"));
+            admin.setName(request.getParameter("name"));
+            admin.setEmail(request.getParameter("email"));
+
+            AdminDAO dao = new AdminDAO();
+            success = dao.addAdmin(admin);
         }
-        else if ("admin".equalsIgnoreCase(role)) {
-                Admin admin = new Admin();
-                admin.setUsername(request.getParameter("username"));
-                admin.setPassword(request.getParameter("password"));
-                admin.setName(request.getParameter("name"));
-                admin.setEmail(request.getParameter("email"));
 
-                AdminDAO dao = new AdminDAO();
-                success = dao.addAdmin(admin);
-            }
-
-
-            if (success) {
+        if (success) {
             request.getSession().setAttribute("loginSuccess", "Registration successful! Please log in.");
             response.sendRedirect("index.jsp");
         } else {

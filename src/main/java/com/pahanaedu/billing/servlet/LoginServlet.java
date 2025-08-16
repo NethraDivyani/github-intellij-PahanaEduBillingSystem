@@ -41,10 +41,7 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect("Cashier.jsp"); // cashier dashboard
                 return;
             }
-        } else if ("customer".equalsIgnoreCase(role)) {
-            // Similar code for customer authentication using CustomerDAO
         }
-
         if (!authenticated) {
             request.setAttribute("loginError", "Invalid username/password/role");
             request.getRequestDispatcher("index.jsp").forward(request, response);

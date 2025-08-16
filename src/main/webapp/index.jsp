@@ -112,7 +112,6 @@
                 <option value="" disabled selected>-- Select Role --</option>
                 <option value="admin">Admin</option>
                 <option value="cashier">Cashier</option>
-                <option value="customer">Customer</option>
             </select>
 
             <button type="submit">Login</button>
@@ -126,15 +125,6 @@
     </div>
 </div>
 
-<script>
-    document.getElementById("loginForm").addEventListener("submit", function(event) {
-        const roleSelect = document.getElementById("role");
-        if (!roleSelect.value) {
-            event.preventDefault();
-            alert("Please select your user role.");
-        }
-    });
-</script>
 <script>
     <% if (loginError != null) { %>
     alert("<%= loginError.replace("\"", "\\\"").replace("\n", "\\n") %>");
