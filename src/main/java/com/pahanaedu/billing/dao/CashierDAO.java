@@ -50,25 +50,6 @@ public class CashierDAO {
         return null; // login failed
     }
 
-    // Add a new cashier
-    public boolean addCashier(Cashier cashier) {
-        String sql = "INSERT INTO cashier (username, password, name, email, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, cashier.getUsername());
-            stmt.setString(2, cashier.getPassword());
-            stmt.setString(3, cashier.getName());
-            stmt.setString(4, cashier.getEmail());
-            stmt.setString(5, cashier.getStatus());
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
     // Check if email exists for cashier
     public boolean emailExists(String email) {
