@@ -42,6 +42,28 @@ public class AdminDAO {
         }
         return null;
     }
+    public static boolean emailExists(String email) {
+        boolean exists = false;
+        String[] tables = {"admin", "cashier"};
+
+        try (Connection conn = DBConnection.getConnection()) {
+            for (String table : tables) {
+                String sql = "SELECT 1 FROM " + table + " WHERE email = ? LIMIT 1";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, email);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return exists;
+    }
 
     // Add a new customer
     public boolean addCustomer(Customer customer) {

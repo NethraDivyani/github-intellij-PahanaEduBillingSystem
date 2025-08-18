@@ -95,6 +95,7 @@
     <div class="title-banner">Register</div>
 
     <div class="login-container">
+
         <form method="post" action="RegisterServlet" autocomplete="off">
             <label for="name">Full Name:</label>
             <input type="text" id="name" name="name" required />
@@ -118,8 +119,26 @@
             <button type="submit">Register</button>
         </form>
     </div>
+
 </div>
 
+
+<%
+    String loginError = (String) request.getAttribute("loginError");
+    String loginSuccess = (String) session.getAttribute("loginSuccess");
+    if (loginSuccess != null) {
+        session.removeAttribute("loginSuccess"); // remove after showing
+    }
+%>
+<script>
+    <% if (loginError != null) { %>
+    alert("<%= loginError %>");
+    <% } %>
+
+    <% if (loginSuccess != null) { %>
+    alert("<%= loginSuccess %>");
+    <% } %>
+</script>
 
 </body>
 </html>

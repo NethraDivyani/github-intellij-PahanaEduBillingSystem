@@ -492,11 +492,11 @@
     const quantity = Number(document.getElementById('itemQuantity').value);
     const category = document.getElementById('itemCategory').value.trim();
 
-    if (!name || isNaN(price) || isNaN(quantity)) {
-      showMessage('Please fill in required fields with valid values.', 'error');
+    if (!name || isNaN(price) || price <= 0 || isNaN(quantity) || quantity < 0) {
+      showMessage('Please fill in valid values.', 'error');
       return;
     }
-
+    
     const params = new URLSearchParams();
     params.append('name', name);
     params.append('description', description);
@@ -537,10 +537,11 @@
     const quantity = Number(document.getElementById('itemQuantity').value);
     const category = document.getElementById('itemCategory').value.trim();
 
-    if (!name || isNaN(price) || isNaN(quantity)) {
-      showMessage('Please fill in required fields with valid values.', 'error');
+    if (!name || isNaN(price) || price <= 0 || isNaN(quantity) || quantity < 0) {
+      showMessage('Please fill in valid values.', 'error');
       return;
     }
+
 
     const params = new URLSearchParams();
     params.append('itemId', itemId);
