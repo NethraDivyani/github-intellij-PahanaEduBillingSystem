@@ -3,6 +3,7 @@ package com.pahanaedu.billing.servlet;
 import com.pahanaedu.billing.dao.AdminDAO;
 import com.pahanaedu.billing.model.Admin;
 import com.pahanaedu.billing.model.Cashier;
+import com.pahanaedu.billing.util.UserFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,38 +19,31 @@ public class RegisterServlet extends HttpServlet {
 
         String role = request.getParameter("role");
         String email = request.getParameter("email");
-        boolean success = false;
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String name = request.getParameter("name");
 
-        // ✅ 1. Validate duplicate email (DB check)
-        if (AdminDAO.emailExists(email)) {
+        boolean success = false;
+        AdminDAO dao = new AdminDAO(); // create a DAO instance
+
+        // 1. Validate duplicate email (DB check)
+        if (dao.emailExists(email)) { // call via instance
             request.setAttribute("loginError", "This email is already registered. Please use another one.");
             request.getRequestDispatcher("Register.jsp").forward(request, response);
-            return; // stop execution if email exists
+            return;
         }
 
-        // 2. Register user
-        if ("cashier".equalsIgnoreCase(role)) {
-            Cashier cashier = new Cashier();
-            cashier.setUsername(request.getParameter("username"));
-            cashier.setPassword(request.getParameter("password"));
-            cashier.setName(request.getParameter("name"));
-            cashier.setEmail(email);
-            cashier.setStatus("active");
+        // 2. Create user using factory
+        Object user = UserFactory.createUser(role, username, password, name, email);
 
-            success = AdminDAO.addCashier(cashier);
-
-        } else if ("admin".equalsIgnoreCase(role)) {
-            Admin admin = new Admin();
-            admin.setUsername(request.getParameter("username"));
-            admin.setPassword(request.getParameter("password"));
-            admin.setName(request.getParameter("name"));
-            admin.setEmail(email);
-
-            AdminDAO dao = new AdminDAO();
-            success = dao.addAdmin(admin);
+        // 3. Save user using DAO
+        if (user instanceof Admin) {
+            success = dao.addAdmin((Admin) user); // instance method
+        } else if (user instanceof Cashier) {
+            success = dao.addCashier((Cashier) user); // instance method
         }
 
-        // 3. Handle result
+        // 4. Handle result
         if (success) {
             HttpSession session = request.getSession();
             session.setAttribute("loginSuccess", "Registration successful! Please log in.");
